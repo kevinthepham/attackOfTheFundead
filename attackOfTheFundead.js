@@ -1,32 +1,37 @@
-var canvas = document.getElementId("myCanvas");
-var context = canvas.getContext('2d');
-var playerX = 0;
-var playerY = 0;
+var canvas = document.getElementById("myCanvas");
+var context = canvas.getContext("2d");
+var playerX = (canvas.width / 2) - 10;
+var playerY = (canvas.height / 2) - 25;
 
-window.addEventListener("onkeydown", movePlayer, false);
+var playerImg = document.getElementById("human");
+var zombieImg = document.getElementById("zombie");
+
+context.drawImage(playerImg, playerX, playerY, 20, 50);
+window.addEventListener("keydown", movePlayer, false);
 
 function movePlayer(e) {
     context.clearRect(0, 0, canvas.width, canvas.height);
     switch (e.keyCode) {
         case 37:                // left arrow
-            if (x > 0) {
-                x -= 5;
+            if (playerX > -0) {
+                playerX -= 5;
             }
             break;
         case 38:                // up arrow
-            if (y > 5) {
-                y -= 5;
+            if (playerY > -10) {
+                playerY -= 5;
             }
             break;
         case 39:                // right arrow
-            if (x < 595) {
-                x += 5;
+            if (playerX < canvas.width - 20) {
+                playerX += 5;
             }
             break;
         case 40:                // down arrow
-            if (y < 595) {
-                y += 5;
+            if (playerY < canvas.height - 45) {
+                playerY += 5;
             }
             break;
     }
+    context.drawImage(playerImg, playerX, playerY, 20, 50);
 }
