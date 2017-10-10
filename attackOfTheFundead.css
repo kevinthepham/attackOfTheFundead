@@ -1,8 +1,4 @@
 #myCanvas {
-    min-width: 600px;
-    min-height: 600px;
-    width: 95vw;
-    height: 80vh;
     border: 3px black solid;
 }
 
