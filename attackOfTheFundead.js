@@ -8,17 +8,52 @@ var playerMovement = [0, 0, 0, 0];
 var playerImg = document.getElementById("human");
 var zombieImg = document.getElementById("zombie");
 
-var zombieX = [25,155,200,400];
-var zombieY = [25,155,200,400];
+//var zombieDied = new Audio('./sounds/zombieNoise.mp3');
+var zombieDied = new Audio('./sounds/zombieNoiseCut.mp3');
+
+var zombieX = [175,1400,175,1400];
+var zombieY = [25,25,525,525];
 var bulletArr = [[]];
 
 var framesSurvived = 0;
 var kills = 0;
 var moveRate = 10;
+var isDead = false;
 
 window.addEventListener("keydown", startPlayerMovement);
 window.addEventListener("keyup", stopPlayerMovement);
 canvas.addEventListener("mousedown", fireBullet);
+canvas.addEventListener("mousedown", startGame);
+
+update_scores();
+
+context.fillStyle = "black";
+context.font = "30px Arial";
+context.fillText("Click to start game.", 666, 300);
+
+function startGame(){
+    canvas.removeEventListener("mousedown", startGame);
+    /**
+     * Below determines the refresh rate of the game.
+     */
+    window.setInterval(function(){
+        playerMoved = false;
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        drawPlayer();
+        drawBullets();
+        drawZombies(zombieX, zombieY);
+
+        checkKill();
+        updateScore();
+
+        updateZombies();
+        spawnZombies();
+        framesSurvived += 1;
+    }, 1000 / 24);
+}
+
+
 
 /** stopPlayerMovement()
  *
@@ -45,24 +80,7 @@ function stopPlayerMovement(e) {
     }
 }
 
-/**
- * Below determines the refresh rate of the game.
- */
-window.setInterval(function(){
-    playerMoved = false;
-    context.clearRect(0, 0, canvas.width, canvas.height);
 
-    drawPlayer();
-    drawBullets();
-    drawZombies(zombieX, zombieY);
-
-    checkKill();
-    updateScore();
-
-    updateZombies();
-    spawnZombies();
-        framesSurvived += 1;
-}, 1000 / 24);
 
 /**movePlayer()
  * Set the player to move the direction the user decided.
@@ -129,10 +147,16 @@ function updateZombies() {
         var collision = false;
         var dist = Math.sqrt(Math.pow(playerY - zombieY[i], 2) + Math.pow(playerX - zombieX[i], 2));
         if (dist < 20) {
-            alert("You died. Get gooder.");
+            if(!isDead) {
+                isDead = true;
+                alert("You died. Get gooder.\nYou survived " +
+                    Math.floor(framesSurvived / 24) + " seconds!");
+                highscore(kills);
+                window.location.reload();
+            }
         }
-        proposedX = ( (playerX - zombieX[i]) / (dist / 4));
-        proposedY = ( (playerY - zombieY[i]) / (dist / 4));
+        proposedX = ( (playerX - zombieX[i]) / (dist / 8));
+        proposedY = ( (playerY - zombieY[i]) / (dist / 8));
 
         for (j = 0; j < zombieX.length; j++) {
             if (Math.abs(proposedX + zombieX[i] - zombieX[j]) < 20 &&
@@ -162,24 +186,33 @@ function updateZombies() {
  * Adds new zombies to the canvas at the edges of the screen.
  */
 function spawnZombies(){
+    numSpawn = Math.floor(framesSurvived/96);
     if(framesSurvived % 96 == 0){
-        zombieX.push(Math.floor((Math.random() * canvas.width - 20) + 0));
-        zombieY.push(0);
+        for(i = 0; i<numSpawn; i++) {
+            zombieX.push(Math.floor((Math.random() * canvas.width - 20) + 0));
+            zombieY.push(0);
+        }
     }
     else if(framesSurvived % 72 == 0)
     {
-        zombieX.push(0);
-        zombieY.push(Math.floor((Math.random() * canvas.height - 45) - 10));
+        for(i = 0; i<numSpawn; i++) {
+            zombieX.push(0);
+            zombieY.push(Math.floor((Math.random() * canvas.height - 45) - 10));
+        }
     }
     else if(framesSurvived % 48 == 0)
     {
-        zombieX.push(Math.floor((Math.random() * canvas.width - 20) + 0));
-        zombieY.push(canvas.height);
+        for(i = 0; i<numSpawn; i++) {
+            zombieX.push(Math.floor((Math.random() * canvas.width - 20) + 0));
+            zombieY.push(canvas.height);
+        }
     }
     else if(framesSurvived % 24 == 0)
     {
-        zombieX.push(canvas.width);
-        zombieY.push(Math.floor((Math.random() * canvas.height - 45) - 10));
+        for(i = 0; i<numSpawn; i++) {
+            zombieX.push(canvas.width);
+            zombieY.push(Math.floor((Math.random() * canvas.height - 45) - 10));
+        }
     }
 
 }
@@ -199,6 +232,10 @@ function fireBullet(e) {
     //alert("bullet array at" + e.offsetX + "   " + e.offsetY);
 }
 
+/** drawBullets()
+ * Iterates through bulletArr and draws each element onto the canvas after updating its position
+ * to move towards where the mouse was pointing at when the element was first created.
+ */
 function drawBullets() {
     for (i = 1; i < bulletArr.length; i++) {
         bulletArr[i][0] += bulletArr[i][2];
@@ -207,6 +244,9 @@ function drawBullets() {
         context.beginPath();
         context.arc(bulletArr[i][0], bulletArr[i][1], 6, 0, 2 * Math.PI);
         context.fill();
+        if(bulletArr[i][0] < -50 || bulletArr[i][0] > canvas.width + 50 || bulletArr[i][1] < -50 || bulletArr[i][1] > canvas.height+50){
+            bulletArr.splice(i, 1);
+        }
     }
 }
 
@@ -223,6 +263,7 @@ function checkKill(){
                 if (bulletArr[j][1] - zombieY[i] < 50 && bulletArr[j][1] - zombieY[i] > 0) {
                     zombieX.splice(i, 1);
                     zombieY.splice(i, 1);
+                    zombieDied.play();
                     kills += 1;
                     updateScore();
                 }
@@ -231,6 +272,9 @@ function checkKill(){
     }
 }
 
+/** updateScore()
+ * Displays the score (number of zombie kills) the player has earned in the top left of the canvas.
+ */
 function updateScore() {
     context.fillStyle = "black";
     context.font = "30px Arial";
