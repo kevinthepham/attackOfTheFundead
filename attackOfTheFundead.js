@@ -7,6 +7,7 @@ var playerMovement = [0, 0, 0, 0];
 
 var playerImg = document.getElementById("human");
 var zombieImg = document.getElementById("zombie");
+var background = document.getElementById("map");
 
 //var zombieDied = new Audio('./sounds/zombieNoise.mp3');
 var zombieDied = new Audio('./sounds/zombieNoiseCut.mp3');
@@ -29,7 +30,7 @@ update_scores();
 
 context.fillStyle = "black";
 context.font = "30px Arial";
-context.fillText("Click to start game.", 666, 300);
+context.fillText("Click to start game", 666, 300);
 
 function startGame(){
     canvas.removeEventListener("mousedown", startGame);
@@ -39,6 +40,7 @@ function startGame(){
     window.setInterval(function(){
         playerMoved = false;
         context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(background,0,0,1600,600);
 
         drawPlayer();
         drawBullets();
@@ -55,7 +57,8 @@ function startGame(){
 
 
 
-/** stopPlayerMovement()
+/**stopPlayerMovement()
+ * Saves that the user has let go of a directional key to control the player
  *
  * @param e: event of a key getting let go.
  */
@@ -92,18 +95,22 @@ function startPlayerMovement(e) {
         case 37: // left arrow
         case 65: // 'a' key
             playerMovement[0] = 1;
+            playerMovement[2] = 0;
             break;
         case 38: // up arrow
         case 87:// 'w' key
             playerMovement[1] = 1;
+            playerMovement[3] = 0;
             break;
         case 39: // right arrow
         case 68: // 'd' key
             playerMovement[2] = 1;
+            playerMovement[0] = 0;
             break;
         case 40: // down arrow
         case 83: // 's' key
             playerMovement[3] = 1;
+            playerMovement[1] = 0;
     }
 }
 
