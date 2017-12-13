@@ -1,11 +1,10 @@
-#JavaScript Game Requirements
+# JavaScript Game Requirements
   
 There are several elements that must be present in your game:
 
 1. **Your scene must be drawn using a HTML5 canvas.**
 
 2. **Your game must accept input from the keyboard and/or the mouse.**
-
 Be sure to explain on the webpage what the different keys and mouse do. A new player should be able to read the page and start playing the game right away. For instance, the mouse may be used to aim a missile launcher and clicking shoots a missile. It is typically standard for the w, a, s, d keys or arrow keys to be used if moving a character around the screen.
 
 3. **Your game must have an incentive/reward/goal/target.**
